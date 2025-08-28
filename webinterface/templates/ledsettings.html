@@ -1,0 +1,289 @@
+<div class="transition duration-300 slide-in-content w-full lg:w-11/12 xl:w-11/12 2xl:w-11/12 m-auto
+grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+    <div class="flex-1 p-5 bg-gray-200 dark:bg-gray-700 shadow-xl rounded-lg">
+        {% include 'ledcolor.html' %}
+    </div>
+
+    <div class="flex-1 p-5 bg-gray-200 dark:bg-gray-700 shadow-xl rounded-lg">
+        {% include 'lightmode.html' %}
+    </div>
+
+    <div class="flex-1 grid p-5 bg-gray-200 dark:bg-gray-700 shadow-xl rounded-lg">
+        <div class="flex-1 font-bold text-xl pb-2 text-gray-600 dark:text-gray-400" data-translate="brightness">
+            Brightness
+        </div>
+        <div class="content-center flex-1">
+            <input id="brightness" class="w-full" type="range" value="50" min="1" max="100"
+                   oninput="this.nextElementSibling.value = this.value+'%' ">
+            <output id="brightness_percent" class="flex justify-center">50%</output>
+            <div class="advanced-content">
+                <label for="gamma_correction">Gamma Correction:</label>
+                <input id="gamma_correction" name="led_gamma" type="number" value="1" min="0.01" max="10.0"
+                    class="h-10 block appearance-none w-full bg-gray-100 dark:bg-gray-600
+                            py-2 px-2 rounded-2xl leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    title="Use 2.8 for linear perception"
+                    onchange="change_setting('led_gamma', this.value);">
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 grid p-5 bg-gray-200 dark:bg-gray-700 shadow-xl rounded-lg">
+        <div class="flex-1 font-bold text-xl pb-2 text-gray-600 dark:text-gray-400" data-translate="backlight">
+            Backlight
+        </div>
+        <div class="flex-1">
+            <input id="backlight_color" type="color" value="#ffffff"
+                   class="cursor-pointer h-8 w-full bg-gray-200 dark:bg-gray-700"
+                   oninput="editLedColor(event, 'backlight_');"
+                   onclick="editLedColor(event, 'backlight_');"
+                   onchange="change_setting('backlight_color', this.value);">
+            <div id="backlightcolors" class="justify-center flex">
+                <span class="w-1/12 h-8 px-2 py-1 bg-gray-200 dark:bg-gray-700 text-red-400">R:</span>
+                <input id="backlight_red" name="field_name" type="number" value="255" min="0" max="255"
+                       class="h-8 w-2/12 h-8 bg-gray-200 dark:bg-gray-700" onkeyup=enforceMinMax(this)>
+                <span class="w-1/12 h-8 px-2 py-1 bg-gray-200 dark:bg-gray-700 text-green-400">G:</span>
+                <input id="backlight_green" name="field_name" type="number" value="255" min="0" max="255"
+                       class="h-8 w-2/12 h-8 bg-gray-200 dark:bg-gray-700" onkeyup=enforceMinMax(this)>
+                <span class="w-1/12 h-8 px-2 py-1 bg-gray-200 dark:bg-gray-700 text-blue-400">B:</span>
+                <input id="backlight_blue" name="field_name" type="number" value="255" min="0" max="255"
+                       class="h-8 w-2/12 h-8 bg-gray-200 dark:bg-gray-700" onkeyup=enforceMinMax(this)>
+            </div>
+        </div>
+        <div class="content-center flex-1">
+            <input id="backlight_brightness" class="w-full" type="range" value="50" min="0" max="100"
+                   oninput="this.nextElementSibling.value = this.value+'%' ">
+            <output id="backlight_brightness_percent" class="flex justify-center -mb-4">50%</output>
+        </div>
+
+        <div class="flex items-center mt-2">
+            <input onclick="change_setting('disable_backlight_on_idle', this.checked)" id="disable_backlight" type="checkbox"
+                   value="" class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500
+                   dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="disable_backlight" class=" pl-2 block uppercase
+            tracking-wide text-xs font-bold mt-2 text-gray-600 dark:text-gray-400" data-translate="disable_backlight_on_idle">
+                Disable on idle
+            </label>
+        </div>
+    </div>
+
+    <div class="flex-1 p-5 bg-gray-200 dark:bg-gray-700 shadow-xl rounded-lg">
+        <div class="flex-1 font-bold text-xl pb-2 text-gray-600 dark:text-gray-400" data-translate="sides_colors">
+            Sides Colors
+        </div>
+
+        <div class="relative">
+            <select id="sides_color_mode" class="h-10 block appearance-none w-full bg-gray-100 dark:bg-gray-600
+        py-2 px-2 pr-8 rounded-2xl leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                <option value="Off" data-translate="off">Off</option>
+                <option value="Main" data-translate="same_as_led_color">Same as led color</option>
+                <option value="RGB" data-translate="rgb">RGB</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-200">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div id="sides_color_choose" class="flex-1">
+            <input id="sides_color" type="color" value="#ffffff"
+                   class="cursor-pointer h-8 w-full bg-gray-200 dark:bg-gray-700"
+                   onclick="editLedColor(event, 'sides_');"
+                   oninput="editLedColor(event, 'sides_');"
+                   onchange="change_setting('sides_color', this.value)"
+            >
+            <div id="sidescolors" class="justify-center flex">
+                <span class="w-1/12 h-8 px-2 py-1 bg-gray-200 dark:bg-gray-700 text-red-400">R:</span>
+                <input id="sides_red" name="field_name" type="number" value="255" min="0" max="255"
+                       class="h-8 w-2/12 h-8 bg-gray-200 dark:bg-gray-700" onkeyup=enforceMinMax(this)>
+                <span class="w-1/12 h-8 px-2 py-1 bg-gray-200 dark:bg-gray-700 text-green-400">G:</span>
+                <input id="sides_green" name="field_name" type="number" value="255" min="0" max="255"
+                       class="h-8 w-2/12 h-8 bg-gray-200 dark:bg-gray-700" onkeyup=enforceMinMax(this)>
+                <span class="w-1/12 h-8 px-2 py-1 bg-gray-200 dark:bg-gray-700 text-blue-400">B:</span>
+                <input id="sides_blue" name="field_name" type="number" value="255" min="0" max="255"
+                       class="h-8 w-2/12 h-8 bg-gray-200 dark:bg-gray-700" onkeyup=enforceMinMax(this)>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="flex-1 grid p-5 bg-gray-200 dark:bg-gray-700 shadow-xl rounded-lg">
+        <div class="flex-1 font-bold text-xl pb-2 text-gray-600 dark:text-gray-400" data-translate="adjustments">
+            Adjustments
+        </div>
+        <div class="flex flex-wrap">
+            <div class="w-full md:w-1/2 px-3 md:mb-0">
+                <label class="block tracking-wide text-xs font-bold mt-2 text-gray-600 dark:text-gray-400">
+                    <div class="flex">
+                        <div class="uppercase" data-translate="skipped_notes">
+                            Skipped Notes
+                        </div>
+                        <div class='has-tooltip'>
+                        <span class='inline-block tooltip rounded shadow-lg p-1 bg-gray-100
+                        dark:bg-gray-600 text-gray-600 dark:text-gray-400 -mt-8'>
+                            <div data-translate="finger_based_ignore">Finger Based: ignore notes with information about which hand to play</div>
+                            <div data-translate="normal_ignore_all_other">Normal: ignore all other notes</div>
+                        </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4" fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </label>
+                <div class="relative">
+                    <select id="skipped_notes" class="h-10 block appearance-none w-full bg-gray-100 dark:bg-gray-600
+            py-2 px-2 pr-8 rounded-2xl leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                        <option value="None" data-translate="none">None</option>
+                        <option value="Normal" data-translate="normal">Normal</option>
+                        <option value="Finger-based" data-translate="finger_based">Finger Based</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-200">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-1/2 px-3 md:mb-0">
+                <label class="block uppercase tracking-wide text-xs font-bold mt-2 text-gray-600 dark:text-gray-400"
+                       data-translate="reverse">
+                    Reverse
+                </label>
+                <div class="relative">
+                    <select id="reverse" class="h-10 block appearance-none w-full bg-gray-100 dark:bg-gray-600
+            py-2 px-2 pr-8 rounded-2xl leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                        <option value="0" data-translate="normal">Normal</option>
+                        <option value="1" data-translate="inverted">Inverted</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-200">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="flex flex-wrap">
+            <div class="w-full md:w-1/3 px-3 md:mb-0">
+                <label class="h-8 block uppercase tracking-wide text-xs font-bold mt-2 text-gray-600 dark:text-gray-400"
+                       data-translate="shift">
+                    Shift
+                </label>
+                <div class="flex">
+                    <svg onclick="document.getElementById('shift').stepDown();
+                    document.getElementById('shift').dispatchEvent(new Event('change'));
+                    temporary_show_chords_animation();" xmlns="http://www.w3.org/2000/svg"
+                         class="m-auto w-full h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <input id="shift" name="field_name" type="number" value="176" min="-255" max="255"
+                           class="h-10 block appearance-none w-full bg-gray-100 dark:bg-gray-600
+                text-center rounded-2xl leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                    <svg onclick="document.getElementById('shift').stepUp();
+                        document.getElementById('shift').dispatchEvent(new Event('change'));
+                        temporary_show_chords_animation();" xmlns="http://www.w3.org/2000/svg"
+                         class="m-auto w-full h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="w-full md:w-1/3 px-3 md:mb-0">
+                <label class="h-8 block uppercase tracking-wide text-xs font-bold mt-2 text-gray-600 dark:text-gray-400"
+                       data-translate="led_count">
+                    Led Count
+                </label>
+                <div class="flex">
+                    <svg onclick="document.getElementById('led_count').stepDown();
+                    document.getElementById('led_count').dispatchEvent(new Event('change'));
+                    temporary_show_chords_animation(true);" xmlns="http://www.w3.org/2000/svg"
+                         class="m-auto w-full h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <input id="led_count" name="field_name" type="number" value="176" min="0" max="255"
+                           class="h-10 block appearance-none w-full bg-gray-100 dark:bg-gray-600
+            text-center rounded-2xl leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                    <svg onclick="document.getElementById('led_count').stepUp();
+                        document.getElementById('led_count').dispatchEvent(new Event('change'));
+                        temporary_show_chords_animation(true);" xmlns="http://www.w3.org/2000/svg"
+                         class="m-auto w-full h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="w-full md:w-1/3 px-3 md:mb-0">
+                <label class="h-8 block uppercase tracking-wide text-xs font-bold mt-2 text-gray-600 dark:text-gray-400"
+                       data-translate="leds_per_meter">
+                    Leds per meter
+                </label>
+                <div class="flex">
+                    <svg onclick="document.getElementById('leds_per_meter').stepDown();
+                    document.getElementById('leds_per_meter').dispatchEvent(new Event('change'));
+                    temporary_show_chords_animation();"
+                         xmlns="http://www.w3.org/2000/svg" class="m-auto w-full h-6 w-6 cursor-pointer" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <input id="leds_per_meter" name="field_name" type="number" value="144" min="1" max="255"
+                           class="h-10 block appearance-none w-full bg-gray-100 dark:bg-gray-600
+            text-center rounded-2xl leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                    <svg onclick="document.getElementById('leds_per_meter').stepUp();
+                        document.getElementById('leds_per_meter').dispatchEvent(new Event('change'));
+                        temporary_show_chords_animation();" xmlns="http://www.w3.org/2000/svg"
+                         class="m-auto w-full h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="flex-1 p-5 bg-gray-200 dark:bg-gray-700 shadow-xl rounded-lg">
+        <div class="flex">
+            <div class="flex-1 font-bold text-xl pb-2 text-gray-600 dark:text-gray-400"
+                 data-translate="led_note_offsets">
+                LED Note Offsets
+            </div>
+            <div class='has-tooltip'>
+                        <span class='inline-block tooltip rounded shadow-lg p-1 bg-gray-100
+                        dark:bg-gray-600 text-gray-600 dark:text-gray-400 -mt-8'>
+                            <div data-translate="shift_notes_for_better_alignment">Adjust LED positions for better alignment</div>
+                            <div data-translate="light_number_means">Note Number: 92, Offset: 2: For notes above 92, LEDs shifts 2 positions backwards (towards lower notes)</div>
+                        </span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4" fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="overflow-y-auto overflow-x-hidden max-h-80">
+            <div id="NoteOffsetEntry" class="flex-1">
+            </div>
+        </div>
+    </div>
+</div>
+
+
