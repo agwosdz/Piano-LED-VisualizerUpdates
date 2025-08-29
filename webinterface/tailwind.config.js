@@ -2,7 +2,7 @@ const colors = require('tailwindcss/colors');
 
 module.exports = {
   purge: {
-    content: ['./templates/*.html', './static/*.{html,js}'],
+    content: ['./templates/*.html', './static/*.{html,js}', './enhanced/*.html', './enhanced/js/*.js'],
       safelist: [
         'animate-spin',
         'top-1/2',
