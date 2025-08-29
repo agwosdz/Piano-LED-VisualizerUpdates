@@ -61,6 +61,26 @@ def network():
     return render_template('network.html')
 
 
+@webinterface.route('/piano-3d.html')
+def piano_3d():
+    return webinterface.send_static_file('../enhanced/piano-3d.html')
+
+
+@webinterface.route('/js/piano3d-renderer.js')
+def piano3d_renderer():
+    return webinterface.send_static_file('../enhanced/js/piano3d-renderer.js')
+
+
+@webinterface.route('/js/midi-websocket.js')
+def midi_websocket():
+    return webinterface.send_static_file('../enhanced/js/midi-websocket.js')
+
+
+@webinterface.route('/js/piano-visualizer.js')
+def piano_visualizer():
+    return webinterface.send_static_file('../enhanced/js/piano-visualizer.js')
+
+
 @webinterface.route('/upload', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
