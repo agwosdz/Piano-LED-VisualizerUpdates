@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            display: block;
+            margin: 20px 0;
+        }
+        #output {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebGL Test</h1>
+    <canvas id="test-canvas" width="800" height="600"></canvas>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            console.log(message);
+            output.textContent += message + '\n';
+        }
+        
+        function testWebGL() {
+            try {
+                log('Testing WebGL support...');
+                
+                const canvas = document.getElementById('test-canvas');
+                if (!canvas) {
+                    throw new Error('Canvas not found');
+                }
+                log('Canvas found: ' + canvas.id);
+                
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) {
+                    throw new Error('WebGL not supported');
+                }
+                log('WebGL context created successfully');
+                
+                // Test basic WebGL functionality
+                gl.clearColor(0.2, 0.4, 0.8, 1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                log('WebGL clear test successful');
+                
+                // Test shader compilation
+                const vertexShaderSource = `
+                    attribute vec2 a_position;
+                    void main() {
+                        gl_Position = vec4(a_position, 0.0, 1.0);
+                    }
+                `;
+                
+                const fragmentShaderSource = `
+                    precision mediump float;
+                    void main() {
+                        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                    }
+                `;
+                
+                const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+                gl.shaderSource(vertexShader, vertexShaderSource);
+                gl.compileShader(vertexShader);
+                
+                if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+                    throw new Error('Vertex shader compilation failed: ' + gl.getShaderInfoLog(vertexShader));
+                }
+                log('Vertex shader compiled successfully');
+                
+                const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+                gl.shaderSource(fragmentShader, fragmentShaderSource);
+                gl.compileShader(fragmentShader);
+                
+                if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+                    throw new Error('Fragment shader compilation failed: ' + gl.getShaderInfoLog(fragmentShader));
+                }
+                log('Fragment shader compiled successfully');
+                
+                const program = gl.createProgram();
+                gl.attachShader(program, vertexShader);
+                gl.attachShader(program, fragmentShader);
+                gl.linkProgram(program);
+                
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    throw new Error('Shader program linking failed: ' + gl.getProgramInfoLog(program));
+                }
+                log('Shader program linked successfully');
+                
+                log('All WebGL tests passed!');
+                
+            } catch (error) {
+                log('ERROR: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // Test Piano3DRenderer class loading
+        function testPiano3DRenderer() {
+            try {
+                log('\nTesting Piano3DRenderer class...');
+                
+                if (typeof Piano3DRenderer === 'undefined') {
+                    throw new Error('Piano3DRenderer class not found');
+                }
+                log('Piano3DRenderer class found');
+                
+                const renderer = new Piano3DRenderer('test-canvas');
+                log('Piano3DRenderer instantiated successfully');
+                
+            } catch (error) {
+                log('Piano3DRenderer ERROR: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            testWebGL();
+            
+            // Load Piano3DRenderer and test it
+            const script = document.createElement('script');
+            script.src = '/js/piano3d-renderer.js';
+            script.onload = testPiano3DRenderer;
+            script.onerror = () => log('Failed to load piano3d-renderer.js');
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>

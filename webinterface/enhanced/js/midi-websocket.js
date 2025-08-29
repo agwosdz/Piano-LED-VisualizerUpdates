@@ -280,7 +280,12 @@ MIDIWebSocket.OPEN = 1;
 MIDIWebSocket.CLOSING = 2;
 MIDIWebSocket.CLOSED = 3;
 
-// Export for use in other modules
+// Make available globally for browser use
+if (typeof window !== 'undefined') {
+    window.MIDIWebSocket = MIDIWebSocket;
+}
+
+// Export for use in other modules (Node.js)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = MIDIWebSocket;
 }

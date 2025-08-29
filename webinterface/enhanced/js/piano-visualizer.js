@@ -57,6 +57,9 @@ class PianoVisualizer {
         try {
             this.renderer = new Piano3DRenderer(this.canvasId);
             
+            // Explicitly initialize the renderer
+            this.renderer.init();
+            
             // Setup window resize handler
             window.addEventListener('resize', () => {
                 this.renderer.resize();
@@ -371,7 +374,12 @@ class PianoVisualizer {
     }
 }
 
-// Export for use in other modules
+// Make available globally for browser use
+if (typeof window !== 'undefined') {
+    window.PianoVisualizer = PianoVisualizer;
+}
+
+// Export for use in other modules (Node.js)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PianoVisualizer;
 }

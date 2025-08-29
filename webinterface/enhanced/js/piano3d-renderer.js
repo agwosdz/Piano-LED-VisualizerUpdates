@@ -34,7 +34,8 @@ class Piano3DRenderer {
             far: 10.0
         };
         
-        this.init();
+        // Don't auto-initialize - wait for explicit call
+        // this.init();
     }
     
     init() {
@@ -505,7 +506,12 @@ class Piano3DRenderer {
     }
 }
 
-// Export for use in other modules
+// Make available globally for browser use
+if (typeof window !== 'undefined') {
+    window.Piano3DRenderer = Piano3DRenderer;
+}
+
+// Export for use in other modules (Node.js)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Piano3DRenderer;
 }
