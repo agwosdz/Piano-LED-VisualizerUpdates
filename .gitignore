@@ -3,4 +3,7 @@
 .idea/
 config/settings.xml
 webinterface/node_modules
-
+.bmad-core
+wwwroot
+.trae
+docs

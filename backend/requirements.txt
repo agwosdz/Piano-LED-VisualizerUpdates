@@ -1,0 +1,31 @@
+# Flask web framework and extensions
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-SocketIO==5.3.6
+
+# WebSocket support
+websockets==11.0.3
+python-socketio==5.8.0
+
+# MIDI processing
+python-rtmidi==1.4.9
+mido==1.2.10
+
+# LED control (Raspberry Pi)
+rpi-ws281x==4.3.4
+
+# Async support
+aiofiles==23.2.1
+
+# Utilities
+numpy==1.24.3
+colorama==0.4.6
+
+# Development and testing
+pytest==7.4.2
+pytest-asyncio==0.21.1
+black==23.7.0
+flake8==6.0.0
+
+# Optional: For advanced color calculations
+scipy==1.11.2

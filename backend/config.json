@@ -1,0 +1,36 @@
+{
+  "midi": {
+    "websocket_host": "localhost",
+    "websocket_port": 8765,
+    "default_port": null,
+    "auto_connect": false,
+    "buffer_size": 1024
+  },
+  "led": {
+    "num_leds": 88,
+    "pin": 18,
+    "brightness": 0.8,
+    "default_scheme": "velocity",
+    "fade_time": 0.5,
+    "max_brightness": 1.0,
+    "gamma_correction": 2.2
+  },
+  "web": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "debug": false,
+    "cors_origins": ["*"]
+  },
+  "performance": {
+    "led_update_fps": 60,
+    "status_broadcast_interval": 5.0,
+    "midi_latency_target": 10.0,
+    "max_concurrent_notes": 10
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "piano-led-visualizer.log",
+    "max_size_mb": 10,
+    "backup_count": 3
+  }
+}

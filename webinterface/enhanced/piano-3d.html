@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano LED Visualizer - 3D View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-panel {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .status-label {
+            font-size: 11px;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected {
+            background: #44ff44;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+        }
+        
+        #piano3d-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 200px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+        
+        .control-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 12px;
+        }
+        
+        .control-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .btn.secondary {
+            background: #2196F3;
+        }
+        
+        .btn.secondary:hover {
+            background: #1976D2;
+        }
+        
+        .btn.danger {
+            background: #f44336;
+        }
+        
+        .btn.danger:hover {
+            background: #d32f2f;
+        }
+        
+        .performance-monitor {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .perf-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+            min-width: 120px;
+        }
+        
+        .perf-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(244, 67, 54, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            z-index: 1001;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">
+                🎹 Piano LED Visualizer - 3D View
+            </div>
+            <div class="status-panel">
+                <div class="status-item">
+                    <div class="status-label">FPS</div>
+                    <div class="status-value" id="fps-display">--</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Latency</div>
+                    <div class="status-value" id="latency-display">--</div>
+                </div>
+                <div class="connection-status">
+                    <div class="status-dot" id="connection-dot"></div>
+                    <span id="connection-text">Connecting...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="piano3d-canvas"></canvas>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">Camera Angle</label>
+                    <input type="range" class="control-input" id="camera-angle" min="0" max="360" value="45">
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Camera Height</label>
+                    <input type="range" class="control-input" id="camera-height" min="1" max="10" value="3" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Key Brightness</label>
+                    <input type="range" class="control-input" id="key-brightness" min="0.1" max="2" value="1" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <button class="btn" id="test-keys">Test Keys</button>
+                    <button class="btn secondary" id="reconnect">Reconnect</button>
+                    <button class="btn danger" id="reset-view">Reset View</button>
+                </div>
+            </div>
+            
+            <div class="performance-monitor">
+                <div class="perf-item">
+                    <span>Frame Time:</span>
+                    <span id="frame-time">--</span>
+                </div>
+                <div class="perf-item">
+                    <span>Frame Drops:</span>
+                    <span id="frame-drops">0</span>
+                </div>
+                <div class="perf-item">
+                    <span>Avg Latency:</span>
+                    <span id="avg-latency">--</span>
+                </div>
+                <div class="perf-item">
+                    <span>Active Keys:</span>
+                    <span id="active-keys">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Initializing 3D Piano Visualizer...</div>
+    </div>
+    
+    <div class="error-message hidden" id="error-message">
+        <h3>Initialization Error</h3>
+        <p id="error-text"></p>
+        <button class="btn" onclick="location.reload()">Reload</button>
+    </div>
+    
+    <!-- JavaScript Dependencies -->
+    <script src="js/piano3d-renderer.js"></script>
+    <script src="js/midi-websocket.js"></script>
+    <script src="js/piano-visualizer.js"></script>
+    
+    <script>
+        // Global variables
+        let visualizer = null;
+        let performanceUpdateInterval = null;
+        
+        // DOM elements
+        const loadingElement = document.getElementById('loading');
+        const errorElement = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const fpsDisplay = document.getElementById('fps-display');
+        const latencyDisplay = document.getElementById('latency-display');
+        const connectionDot = document.getElementById('connection-dot');
+        const connectionText = document.getElementById('connection-text');
+        
+        // Performance monitor elements
+        const frameTimeElement = document.getElementById('frame-time');
+        const frameDropsElement = document.getElementById('frame-drops');
+        const avgLatencyElement = document.getElementById('avg-latency');
+        const activeKeysElement = document.getElementById('active-keys');
+        
+        // Control elements
+        const cameraAngleSlider = document.getElementById('camera-angle');
+        const cameraHeightSlider = document.getElementById('camera-height');
+        const keyBrightnessSlider = document.getElementById('key-brightness');
+        const testKeysButton = document.getElementById('test-keys');
+        const reconnectButton = document.getElementById('reconnect');
+        const resetViewButton = document.getElementById('reset-view');
+        
+        // Initialize the application
+        async function init() {
+            try {
+                // Create visualizer instance
+                visualizer = new PianoVisualizer('piano3d-canvas', {
+                    enablePerformanceMonitoring: true,
+                    targetFPS: 60,
+                    maxLatency: 100,
+                    fadeOutTime: 500,
+                    enableVelocityMapping: true,
+                    enableSmoothTransitions: true
+                });
+                
+                // Setup event listeners
+                setupVisualizerEvents();
+                setupControlEvents();
+                
+                // Wait for initialization
+                visualizer.on('initialized', () => {
+                    loadingElement.classList.add('hidden');
+                    startPerformanceMonitoring();
+                });
+                
+                visualizer.on('error', (error) => {
+                    showError(error.message);
+                });
+                
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        function setupVisualizerEvents() {
+            // Connection events
+            visualizer.on('midi_connected', () => {
+                connectionDot.classList.add('connected');
+                connectionText.textContent = 'Connected';
+            });
+            
+            visualizer.on('midi_disconnected', () => {
+                connectionDot.classList.remove('connected');
+                connectionText.textContent = 'Disconnected';
+            });
+            
+            visualizer.on('midi_error', (error) => {
+                connectionDot.classList.remove('connected');
+                connectionText.textContent = 'Error';
+                console.error('MIDI Error:', error);
+            });
+            
+            // Performance events
+            visualizer.on('performance_update', (stats) => {
+                updatePerformanceDisplay(stats);
+            });
+            
+            visualizer.on('high_latency', (data) => {
+                console.warn('High latency warning:', data);
+            });
+            
+            // Note events for active key counting
+            let activeKeyCount = 0;
+            visualizer.on('note_on', () => {
+                activeKeyCount++;
+                activeKeysElement.textContent = activeKeyCount;
+            });
+            
+            visualizer.on('note_off', () => {
+                activeKeyCount = Math.max(0, activeKeyCount - 1);
+                activeKeysElement.textContent = activeKeyCount;
+            });
+        }
+        
+        function setupControlEvents() {
+            // Camera controls
+            cameraAngleSlider.addEventListener('input', (e) => {
+                if (visualizer && visualizer.renderer) {
+                    visualizer.renderer.setCameraAngle(parseFloat(e.target.value));
+                }
+            });
+            
+            cameraHeightSlider.addEventListener('input', (e) => {
+                if (visualizer && visualizer.renderer) {
+                    visualizer.renderer.setCameraHeight(parseFloat(e.target.value));
+                }
+            });
+            
+            keyBrightnessSlider.addEventListener('input', (e) => {
+                if (visualizer && visualizer.renderer) {
+                    visualizer.renderer.setKeyBrightness(parseFloat(e.target.value));
+                }
+            });
+            
+            // Button controls
+            testKeysButton.addEventListener('click', () => {
+                testKeySequence();
+            });
+            
+            reconnectButton.addEventListener('click', () => {
+                if (visualizer) {
+                    visualizer.reconnect();
+                }
+            });
+            
+            resetViewButton.addEventListener('click', () => {
+                if (visualizer && visualizer.renderer) {
+                    visualizer.renderer.resetCamera();
+                    cameraAngleSlider.value = 45;
+                    cameraHeightSlider.value = 3;
+                    keyBrightnessSlider.value = 1;
+                }
+            });
+        }
+        
+        function updatePerformanceDisplay(stats) {
+            fpsDisplay.textContent = stats.fps ? stats.fps.toFixed(1) : '--';
+            latencyDisplay.textContent = stats.averageLatency ? 
+                stats.averageLatency.toFixed(1) + 'ms' : '--';
+            
+            frameTimeElement.textContent = stats.fps ? 
+                (1000 / stats.fps).toFixed(1) + 'ms' : '--';
+            frameDropsElement.textContent = stats.frameDrops || 0;
+            avgLatencyElement.textContent = stats.averageLatency ? 
+                stats.averageLatency.toFixed(1) + 'ms' : '--';
+        }
+        
+        function startPerformanceMonitoring() {
+            performanceUpdateInterval = setInterval(() => {
+                if (visualizer) {
+                    const stats = visualizer.getPerformanceStats();
+                    updatePerformanceDisplay(stats);
+                }
+            }, 1000);
+        }
+        
+        function testKeySequence() {
+            if (!visualizer) return;
+            
+            const testNotes = [60, 64, 67, 72]; // C major chord
+            let delay = 0;
+            
+            testNotes.forEach((note, index) => {
+                setTimeout(() => {
+                    visualizer.simulateNoteOn(note, 80);
+                    setTimeout(() => {
+                        visualizer.simulateNoteOff(note);
+                    }, 500);
+                }, delay);
+                delay += 200;
+            });
+        }
+        
+        function showError(message) {
+            loadingElement.classList.add('hidden');
+            errorText.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (performanceUpdateInterval) {
+                clearInterval(performanceUpdateInterval);
+            }
+            if (visualizer) {
+                visualizer.destroy();
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (visualizer && visualizer.renderer) {
+                visualizer.renderer.resize();
+            }
+        });
+        
+        // Start the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
